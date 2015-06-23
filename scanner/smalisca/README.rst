@@ -32,7 +32,7 @@ There is also a `PyPI <https://pypi.python.org/pypi>`_ package available: `smali
 Documentation
 =============
 
-You can find the latest **documentation** at `http://smalisca.readthedocs.org/en/latest/ <http://smalisca.readthedocs.org/en/latest/>`_.
+You can find the latest **documentation** at `http://smalisca.readthedocs.org/en/stable/ <http://smalisca.readthedocs.org/en/stable/>`_.
 
 
 Author
@@ -45,6 +45,8 @@ Releases
 
 ============ ======== =================================
 Date         Release  MD5
+============ ======== =================================
+2015-06-22   0.2      da6c71543628f2404e97aded72de68ac
 ============ ======== =================================
 2015-04-01   0.1      943930dbd144c52635f3d5b874482d3a
 ============ ======== =================================
