@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: latin-1 -*- ######################################################
 #                ____                     _ __                                 #
 #     ___  __ __/ / /__ ___ ______ ______(_) /___ __                           #
@@ -7,9 +7,6 @@
 #                                            /___/ team                        #
 #                                                                              #
 # dnsspider.py - multithreaded subdomain bruteforcer                           #
-#                                                                              #
-# DATE                                                                         #
-# 08/16/2012                                                                   #
 #                                                                              #
 # DESCRIPTION                                                                  #
 # A very fast multithreaded bruteforcer of subdomains that leverages a         #
@@ -26,6 +23,9 @@
 # - attack while mutating -> don't generate whole list when using -t 1         #
 #                                                                              #
 # CHANGELOG:                                                                   #
+# v0.8                                                                         #
+# - upgraded to python3                                                        #
+#                                                                              #
 # v0.7                                                                         #
 # - upgraded built-in wordlist (more than 2k)                                  #
 # - remove annoying timeout warnings                                           #
@@ -80,14 +80,14 @@ try:
     import dns.message
     import dns.query
 except ImportError:
-    print("[-] ERROR: you need 'dnspython' package")
+    print("[-] ERROR: you need the 'dnspython' package")
     sys.exit()
 
 
 BANNER = '--==[ dnsspider by noptrix@nullsecurity.net ]==--'
 USAGE = '\n' \
         '  dnsspider.py -t <arg> -a <arg> [options]'
-VERSION = 'v0.7'
+VERSION = 'v0.8'
 
 defaults = {}
 hostnames = []
@@ -379,10 +379,10 @@ def get_default_nameserver():
     print('[+] getting default nameserver')
     lines = list(open('/etc/resolv.conf', 'r'))
     for line in lines:
-        line = string.strip(line)
+        line = line.strip()
         if not line or line[0] == ';' or line[0] == '#':
             continue
-        fields = string.split(line)
+        fields = line.split()
         if len(fields) < 2:
             continue
         if fields[0] == 'nameserver':
@@ -443,7 +443,7 @@ def parse_cmdline():
             metavar='<port>',
             dest='port',
             default=0,
-            help='source port to use (default: 0 --> first free random port)'
+            help='source port to use (default: 0 -> first free random port)'
             )
     p.add_argument(
             '-u',
@@ -563,7 +563,7 @@ def read_hostnames(opts):
 
 def attack(opts, hostname, attack_pool):
     if opts.verbose:
-        sys.stdout.write('  -> trying %s\n' % hostname)
+        sys.stdout.write('    > trying %s\n' % hostname)
         sys.stdout.flush()
     try:
         x = dns.message.make_query(hostname, 1)
