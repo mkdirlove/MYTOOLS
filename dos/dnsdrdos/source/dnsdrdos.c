@@ -265,7 +265,7 @@ void usage()
   $ for i in `seq 1 1000`; do ./dnsdrdos -f nameserver.lst \\\n\
   -s 192.168.2.211 -d $i -l 10000; done\n\n\
   This is better, because we ask dynamically for any domain names.\n\
-  Even if the domainname is not given, 'we' still would recieve DNS\n\
+  Even if the domainname is not given, 'we' still would receive DNS\n\
   answers.\n");
 
     __EXIT_SUCCESS;
