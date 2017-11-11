@@ -31,10 +31,10 @@
  * Whats implemented:
  * - Every Genesis button works
  * - D-pad and three fire buttons are mapped to the Amiga game port
- * - One of the unused buttons activates autofire
+ * - Button X: Activates autofire
+ * - Button Y: Left/right alternate for these joystick killers like winter games ;)
  * 
  * Whats planned:
- * - Left/right autofire for these joystick killers like winter games ;)
  * - Record function for complexer combos like Mortal combat fatalities.
  * 
  * For questions, feel free contact christian.ammann@phobosys.de
@@ -75,6 +75,8 @@ int btn_start_c = 7;     //pin 9
 #ifdef PIN_OUTPUT
 boolean autofire_on;
 boolean autofire_status;
+boolean autoleftright_on;
+boolean autoleftright_status;
 
 int amiga_up = 0;        //pin 1
 int amiga_down = 1;      //pin 2
@@ -114,6 +116,8 @@ void setup() {
   #ifdef PIN_OUTPUT
   autofire_on = false;
   autofire_status = true;
+  autoleftright_on = false;
+  autoleftright_status = true;
   
   pinMode(amiga_up, OUTPUT);
   pinMode(amiga_down, OUTPUT);
@@ -181,6 +185,27 @@ void pin_payload(){
     digitalWrite(amiga_btn_1, HIGH); //TODO: not good
   }  
 
+  //check for autoleftright
+  if(btn_details[INDEX_Y] != '_'){
+    autoleftright_on = true;
+    if(autoleftright_status){
+      digitalWrite(amiga_left, LOW);
+      digitalWrite(amiga_right, HIGH);
+      autoleftright_status = false;
+    }
+    else{
+      digitalWrite(amiga_left, HIGH);
+      digitalWrite(amiga_right, LOW);
+      autoleftright_status = true;  
+    }
+  }
+  else{
+    autoleftright_on = false;
+    autoleftright_status = true;
+    digitalWrite(amiga_left, HIGH); //TODO: not good
+    digitalWrite(amiga_right, HIGH); //TODO: not good
+  }
+
   //normal buttons
   if(btn_details[INDEX_UP] != '_'){
     digitalWrite(amiga_up, LOW);
@@ -196,18 +221,21 @@ void pin_payload(){
     digitalWrite(amiga_down, HIGH);
   }
 
-  if(btn_details[INDEX_LEFT] != '_'){
-    digitalWrite(amiga_left, LOW);
-  }
-  else{
-    digitalWrite(amiga_left, HIGH);
-  }
+  //left and right are disabled in autoleftright mode
+  if(!autoleftright_on){
+    if(btn_details[INDEX_LEFT] != '_'){
+      digitalWrite(amiga_left, LOW);
+    }
+    else{
+      digitalWrite(amiga_left, HIGH);
+    }
 
-  if(btn_details[INDEX_RIGHT] != '_'){
-    digitalWrite(amiga_right, LOW);
-  }
-  else{
-    digitalWrite(amiga_right, HIGH);
+    if(btn_details[INDEX_RIGHT] != '_'){
+      digitalWrite(amiga_right, LOW);
+    }
+    else{
+      digitalWrite(amiga_right, HIGH);
+    }
   }
 
   //button 1 is disabled in autofire mode
