@@ -40,7 +40,7 @@ sys.path.append('%s/src/' % definepath)
 banner.print_banner()
 
 print '''
- U3-Pwn is a tool designed to automate injecting executerbles to Sandisk 
+ U3-Pwn is a tool designed to automate injecting executables to Sandisk 
  smart usb devices with default U3 software install.  This is performed by 
  removing the original iso file from the device and creating a new iso 
  with autorun features.
