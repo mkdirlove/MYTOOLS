@@ -33,6 +33,7 @@
  * - D-pad and three fire buttons are mapped to the Amiga game port
  * - Button X: Activates autofire
  * - Button Y: Left/right alternate for these joystick killers like winter games ;)
+ * - Button Mode: Switch to emulate UP with Button B
  * 
  * Whats planned:
  * - Record function for complexer combos like Mortal combat fatalities.
@@ -78,6 +79,9 @@ boolean autofire_status;
 boolean autoleftright_on;
 boolean autoleftright_status;
 
+boolean emulate_up_with_button_two;
+boolean mode_pressed;
+
 int amiga_up = 0;        //pin 1
 int amiga_down = 1;      //pin 2
 int amiga_left = 2;      //pin 3
@@ -118,6 +122,9 @@ void setup() {
   autofire_status = true;
   autoleftright_on = false;
   autoleftright_status = true;
+  
+  emulate_up_with_button_two = false;
+  mode_pressed = false;
   
   pinMode(amiga_up, OUTPUT);
   pinMode(amiga_down, OUTPUT);
@@ -167,6 +174,15 @@ void loop() {
 
 #ifdef PIN_OUTPUT
 void pin_payload(){
+  //check for emulation of up with sega button B
+  if(btn_details[INDEX_MODE] != '_' && !mode_pressed){
+    emulate_up_with_button_two = !emulate_up_with_button_two;
+    mode_pressed = true;
+  }
+  else if(btn_details[INDEX_MODE] == '_'){
+    mode_pressed = false;
+  }
+  
   //check for autofire
   if(btn_details[INDEX_X] != '_'){
     autofire_on = true;
@@ -248,12 +264,27 @@ void pin_payload(){
     }  
   }
 
-  if(btn_details[INDEX_B] != '_'){
-    digitalWrite(amiga_btn_2, LOW);
+  //in this mode, we press B and send
+  //button 2 signal to amiga
+  if(!emulate_up_with_button_two){
+    if(btn_details[INDEX_B] != '_'){
+      digitalWrite(amiga_btn_2, LOW);
+    }
+    else{
+      digitalWrite(amiga_btn_2, HIGH);
+    }
   }
-  else{
-    digitalWrite(amiga_btn_2, HIGH);
-  }      
+  //in this mode, we press B and send
+  //button up signal to amiga. DO not interfere with
+  // the regular UP button.  
+  else if(emulate_up_with_button_two && btn_details[INDEX_UP] == '_'){
+    if(btn_details[INDEX_B] != '_'){
+      digitalWrite(amiga_up, LOW);
+    }
+    else{
+      digitalWrite(amiga_up, HIGH);
+    }     
+  }
 }
 #endif
 
