@@ -11,9 +11,6 @@
 # FILE                                                                         #
 # ripdc.sh                                                                     #
 #                                                                              #
-# DATE                                                                         #
-# 2013-06-05                                                                   #
-#                                                                              #
 # DESCRIPTION                                                                  #
 # A script which maps domains related to an given ip address or domainname.    #
 #                                                                              #
@@ -24,7 +21,7 @@
 
 
 # ripdc version
-VERSION="ripdc.sh v0.2"
+VERSION="ripdc.sh v0.3"
 
 # true / false
 FALSE="0"
@@ -42,22 +39,22 @@ VERBOSE="/dev/null"
 reverse_map()
 {
     # server, request and response settings
-    url="http://domains.yougetsignal.com/"
+    url="https://domains.yougetsignal.com/"
     file="domains.php"
     data="remoteAddress=${target}&key="
-    referer="http://www.yougetsignal.com/tools/web-sites-on-web-server/"
+    referer="https://www.yougetsignal.com/tools/web-sites-on-web-server/"
 
     echo "[+] reverse mapping ${target}"
-    
+
     domains="`curl -e "${referer}" -d "${data}" "${url}${file}" 2> ${VERBOSE} |
     tr -s ':' '\n' | grep '\[\["' | tr -d '{}[]",' | tr -s ' ' '\n'`"
-    
+
     if [ ! -z "${domains}" ]
     then
         echo "[+] listing found domains"
         for domain in ${domains}
         do
-            echo "  -> ${domain}"
+            echo "    > ${domain}"
         done
     else
         warn "no domains were found"
@@ -104,7 +101,7 @@ usage()
     echo "  -H          - print this help and exit"
 
     exit ${SUCCESS}
-    
+
     return ${SUCCESS}
 }
 
