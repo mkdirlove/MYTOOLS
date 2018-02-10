@@ -6,10 +6,10 @@
 #   /_//_/\_,_/_/_/___/\__/\__/\_,_/_/ /_/\__/\_, /                            #
 #                                            /___/ team                        #
 #                                                                              #
-# dnsspider.py - multithreaded subdomain bruteforcer                           #
+# dnsspider.py - async multithreaded subdomain bruteforcer                     #
 #                                                                              #
 # DESCRIPTION                                                                  #
-# A very fast multithreaded bruteforcer of subdomains that leverages a         #
+# A very fast async multithreaded bruteforcer of subdomains that leverages a   #
 # wordlist and/or character permutation.                                       #
 #                                                                              #
 # AUTHOR                                                                       #
@@ -20,9 +20,16 @@
 #                                                                              #
 # TODO:                                                                        #
 # - check if we have to scan if wildcard enabled                               #
-# - attack while mutating -> don't generate whole list when using -t 1         #
 #                                                                              #
 # CHANGELOG:                                                                   #
+#                                                                              #
+# v0.9                                                                         #
+# - use async multithreading via concurrent.futures module                     #
+# - attack while mutating -> don't generate whole list when using -t 1         #
+# - log only the subdomains to logfile when '-r' was chosen                    #
+# - minor code clean-ups / refactoring                                         #
+# - switch to tabstop=2 / shiftwidth=2                                         #
+#                                                                              #
 # v0.8                                                                         #
 # - upgraded to python3                                                        #
 #                                                                              #
@@ -73,21 +80,21 @@ import time
 import string
 import itertools
 import socket
-import threading
 import re
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 try:
-    import dns.message
-    import dns.query
+  import dns.message
+  import dns.query
 except ImportError:
-    print("[-] ERROR: you need the 'dnspython' package")
-    sys.exit()
+  print("[-] ERROR: you need the 'dnspython' package")
+  sys.exit()
 
 
 BANNER = '--==[ dnsspider by noptrix@nullsecurity.net ]==--'
 USAGE = '\n' \
-        '  dnsspider.py -t <arg> -a <arg> [options]'
-VERSION = 'v0.8'
+  '  dnsspider.py -t <arg> -a <arg> [options]'
+VERSION = 'v0.9'
 
 defaults = {}
 hostnames = []
@@ -363,370 +370,313 @@ wordlist = [
 
 
 def usage():
-    print('\n' + USAGE)
-    sys.exit()
-    return
+  print('\n' + USAGE)
+  sys.exit()
+
+  return
 
 
 def check_usage():
-    if len(sys.argv) == 1:
-        print('[!] WARNING: use -H for help and usage')
-        sys.exit()
-    return
+  if len(sys.argv) == 1:
+    print('[!] WARNING: use -H for help and usage')
+    sys.exit()
+
+  return
 
 
 def get_default_nameserver():
-    print('[+] getting default nameserver')
-    lines = list(open('/etc/resolv.conf', 'r'))
-    for line in lines:
-        line = line.strip()
-        if not line or line[0] == ';' or line[0] == '#':
-            continue
-        fields = line.split()
-        if len(fields) < 2:
-            continue
-        if fields[0] == 'nameserver':
-            defaults['nameserver'] = fields[1]
-            return defaults
+  print('[+] getting default nameserver')
+  lines = list(open('/etc/resolv.conf', 'r'))
+  for line in lines:
+    line = line.strip()
+    if not line or line[0] == ';' or line[0] == '#':
+      continue
+    fields = line.split()
+    if len(fields) < 2:
+      continue
+    if fields[0] == 'nameserver':
+      defaults['nameserver'] = fields[1]
+      return defaults
+
+  return
 
 
 def get_default_source_ip():
-    print('[+] getting default ip address')
-    try:
-        # get current used iface enstablishing temp socket
-        ipsocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        ipsocket.connect(("gmail.com", 80))
-        defaults['ipaddr'] = ipsocket.getsockname()[0]
-        print('[+] found currently used interface ip ' + "'" +
-                defaults['ipaddr'] + "'")
-        ipsocket.close()
-    except:
-        print(''' [!] WARNING: can\'t get your ip-address, use "-i" option and
-        define yourself''')
-    return defaults
+  print('[+] getting default ip address')
+  try:
+    # get current used iface enstablishing temp socket
+    ipsocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    ipsocket.connect(("gmail.com", 80))
+    defaults['ipaddr'] = ipsocket.getsockname()[0]
+    print('[+] found currently used interface ip ' + "'" + defaults['ipaddr'] \
+      + "'")
+    ipsocket.close()
+  except:
+    print(''' [!] WARNING: can\'t get your ip-address, use "-i" option and
+      define yourself''')
+
+  return defaults
 
 
 def parse_cmdline():
-    p = argparse.ArgumentParser(usage=USAGE, add_help=False)
-    p.add_argument(
-            '-t',
-            metavar='<type>',
-            dest='type',
-            help='attack type (0 for dictionary 1 for bruteforce)'
-            )
-    p.add_argument(
-            '-a',
-            metavar='<domain>',
-            dest='domain',
-            help='subdomain to bruteforce'
-            )
-    p.add_argument(
-            '-l',
-            metavar='<wordlist>',
-            dest='wordlist',
-            help='wordlist, one hostname per line (default: built-in)'
-            )
-    p.add_argument(
-            '-d',
-            metavar='<nameserver>',
-            dest='dnshost',
-            help="choose another nameserver (default: your system's)"
-            )
-    p.add_argument(
-            '-i',
-            metavar='<ipaddr>',
-            dest='ipaddr',
-            help="source ip address to use (default: your system's)"
-            )
-    p.add_argument(
-            '-p',
-            metavar='<port>',
-            dest='port',
-            default=0,
-            help='source port to use (default: 0 -> first free random port)'
-            )
-    p.add_argument(
-            '-u',
-            metavar='<protocol>',
-            dest='protocol',
-            default='udp',
-            help='speak via udp or tcp (default: udp)'
-            )
-    p.add_argument(
-            '-c',
-            metavar='<charset>',
-            dest='charset',
-            default=0,
-            help='choose charset 0 [a-z0-9], 1 [a-z] or 2 [0-9] (default: 0)'
-            )
-    p.add_argument(
-            '-m',
-            metavar='<maxchar>',
-            dest='max',
-            default=2,
-            help='max chars to bruteforce (default: 2)'
-            )
-    p.add_argument(
-            '-s',
-            metavar='<prefix>',
-            dest='prefix',
-            help="prefix for bruteforce, e.g. 'www'"
-            )
-    p.add_argument(
-            '-g',
-            metavar='<postfix>',
-            dest='postfix',
-            help="postfix for bruteforce, e.g. 'www'"
-            )
-    p.add_argument(
-            '-o',
-            metavar='<sec>',
-            dest='timeout',
-            default=3,
-            help='timeout (default: 3)'
-            )
-    p.add_argument(
-            '-v',
-            action='store_true',
-            dest='verbose',
-            help='verbose mode - prints every attempt (default: quiet)'
-            )
-    p.add_argument(
-            '-w',
-            metavar='<sec>',
-            dest='wait',
-            default=0,
-            help='seconds to wait for next request (default: 0)'
-            )
-    p.add_argument(
-            '-x',
-            metavar='<num>',
-            dest='threads',
-            default=32,
-            help='number of threads to use (default: 32) - choose more :)'
-            )
-    p.add_argument(
-            '-r',
-            metavar='<logfile>',
-            dest='logfile',
-            default='stdout',
-            help='write found subdomains to file (default: stdout)'
-            )
-    p.add_argument(
-            '-V',
-            action='version',
-            version='%(prog)s ' + VERSION,
-            help='print version information'
-            )
-    p.add_argument(
-            '-H',
-            action='help',
-            help='print this help'
-            )
-    return(p.parse_args())
+  p = argparse.ArgumentParser(usage=USAGE, add_help=False)
+  p.add_argument(
+    '-t', metavar='<type>', dest='type',
+    help='attack type (0 for dictionary 1 for bruteforce)'
+  )
+  p.add_argument(
+    '-a', metavar='<domain>', dest='domain', help='subdomain to bruteforce'
+  )
+  p.add_argument(
+    '-l', metavar='<wordlist>', dest='wordlist',
+    help='wordlist, one hostname per line (default: built-in)'
+  )
+  p.add_argument(
+    '-d', metavar='<nameserver>', dest='dnshost',
+    help="choose another nameserver (default: your system's)"
+  )
+  p.add_argument(
+    '-i', metavar='<ipaddr>', dest='ipaddr',
+    help="source ip address to use (default: your system's)"
+  )
+  p.add_argument(
+    '-p', metavar='<port>', dest='port', type=int, default=0,
+    help='source port to use (default: 0 -> first free random port)'
+  )
+  p.add_argument(
+    '-u', metavar='<protocol>', dest='protocol', default='udp',
+    help='speak via udp or tcp (default: udp)'
+  )
+  p.add_argument(
+    '-c', metavar='<charset>', dest='charset', default=0,
+    help='choose charset 0 [a-z0-9], 1 [a-z] or 2 [0-9] (default: 0)'
+  )
+  p.add_argument(
+    '-m', metavar='<maxchar>', dest='max', type=int, default=2,
+    help='max chars to bruteforce (default: 2)'
+  )
+  p.add_argument(
+    '-s', metavar='<prefix>', dest='prefix',
+    help="prefix for bruteforce, e.g. 'www'"
+  )
+  p.add_argument(
+    '-g', metavar='<postfix>', dest='postfix',
+    help="postfix for bruteforce, e.g. 'www'"
+  )
+  p.add_argument(
+    '-o', metavar='<sec>', dest='timeout', default=3,
+    help='timeout (default: 3)'
+  )
+  p.add_argument(
+    '-v', action='store_true', dest='verbose',
+    help='verbose mode - prints every attempt (default: quiet)'
+  )
+  p.add_argument(
+    '-w', metavar='<sec>', dest='wait', default=0,
+    help='seconds to wait for next request (default: 0)'
+  )
+  p.add_argument(
+    '-x', metavar='<num>', dest='threads', type=int, default=32,
+    help='number of threads to use (default: 32) - choose more :)'
+  )
+  p.add_argument(
+    '-r', metavar='<logfile>', dest='logfile', default='stdout',
+    help='write found subdomains to file (default: stdout)'
+  )
+  p.add_argument(
+    '-V', action='version', version='%(prog)s ' + VERSION,
+    help='print version information'
+  )
+  p.add_argument('-H', action='help', help='print this help')
+
+  return(p.parse_args())
 
 
 def check_cmdline(opts):
-    if not opts.type or not opts.domain:
-        print('[-] ERROR: mount /dev/brain')
-        sys.exit()
-    return
+  if not opts.type or not opts.domain:
+    print('[-] ERROR: mount /dev/brain')
+    sys.exit()
+
+  return
 
 
 def set_opts(defaults, opts):
-    if not opts.dnshost:
-        opts.dnshost = defaults['nameserver']
-    if not opts.ipaddr:
-        opts.ipaddr = defaults['ipaddr']
-    if int(opts.charset) == 0:
-        opts.charset = chars + digits
-    elif int(opts.charset) == 1:
-        opts.charset = chars
-    else:
-        opts.charset = digits
-    if not opts.prefix:
-        opts.prefix = prefix
-    if not opts.postfix:
-        opts.postfix = postfix
-    return opts
+  if not opts.dnshost:
+    opts.dnshost = defaults['nameserver']
+  if not opts.ipaddr:
+    opts.ipaddr = defaults['ipaddr']
+  if int(opts.charset) == 0:
+    opts.charset = chars + digits
+  elif int(opts.charset) == 1:
+    opts.charset = chars
+  else:
+    opts.charset = digits
+  if not opts.prefix:
+    opts.prefix = prefix
+  if not opts.postfix:
+    opts.postfix = postfix
+
+  return opts
 
 
 def read_hostnames(opts):
-    print('[+] reading hostnames')
-    hostnames = []
-    if opts.wordlist:
-        hostnames = list(open(opts.wordlist, 'r'))
-        return hostnames
-    else:
-        return wordlist
-
-
-def attack(opts, hostname, attack_pool):
-    if opts.verbose:
-        sys.stdout.write('    > trying %s\n' % hostname)
-        sys.stdout.flush()
-    try:
-        x = dns.message.make_query(hostname, 1)
-        if opts.protocol == 'udp':
-            a = dns.query.udp(x, opts.dnshost, float(opts.timeout), 53, None,
-                    opts.ipaddr, int(opts.port), True, False)
-        else:
-            a = dns.query.tcp(x, opts.dnshost, float(opts.timeout), 53, None,
-                    opts.ipaddr, int(opts.port), False)
-        attack_pool.release()
-    except dns.exception.Timeout:
-        sys.exit()
-    except socket.error:
-        print('''[-] ERROR: no connection? ip|srcport incorrectly defined? you
-        can run only one thread if fixed source port specified!''')
-        sys.exit()
-    if a.answer:
-        answ = ''
-        # iterate dns rrset answer (can be multiple sets) field to extract
-        # detailed info (dns and ip)
-        for i in a.answer:
-            answ += str(i[0])
-            answ += ' '
-        answer = (hostname, answ)
-        found.append(answer)
-    else:
-        pass
-    return
-
-
-def str_gen(opts, hostnames):
-    print('[+] generating list of strings')
-    tmp_hostnames = itertools.product(opts.charset, repeat=int(opts.max))
-    hostnames = list(tmp_hostnames)
-    hostnames = map(''.join, hostnames)
+  print('[+] reading hostnames')
+  hostnames = []
+  if opts.wordlist:
+    hostnames = list(open(opts.wordlist, 'r'))
     return hostnames
+  else:
+    return wordlist
+
+  return
 
 
-def run_threads(opts, hostname, attack_pool, threads):
-    t = threading.Thread(target=attack, args=(opts, hostname, attack_pool))
-    attack_pool.acquire()
-    t.start()
-    threads.append(t)
-    return threads
+def attack(opts, hostname):
+  if opts.verbose:
+    sys.stdout.write('    > trying %s\n' % hostname)
+    sys.stdout.flush()
+  try:
+    x = dns.message.make_query(hostname, 1)
+    if opts.protocol == 'udp':
+      a = dns.query.udp(x, opts.dnshost, float(opts.timeout), 53, None,
+        opts.ipaddr, opts.port, True, False)
+    else:
+      a = dns.query.tcp(x, opts.dnshost, float(opts.timeout), 53, None,
+        opts.ipaddr, opts.port, False)
+  except dns.exception.Timeout:
+    sys.exit()
+  except socket.error:
+    print('''[-] ERROR: no connection? ip|srcport incorrectly defined? you can
+           run only one thread if fixed source port specified!''')
+    sys.exit()
+  if a.answer:
+    answ = ''
+    # iterate dns rrset answer (can be multiple sets) field to extract
+    # detailed info (dns and ip)
+    for i in a.answer:
+      answ += str(i[0])
+      answ += ' '
+    answer = (hostname, answ)
+    found.append(answer)
+  else:
+    pass
+
+  return
 
 
 def prepare_attack(opts, hostnames):
-    sys.stdout.write('[+] attacking \'%s\' via ' % opts.domain)
-    threads = list()
-    attack_pool = threading.BoundedSemaphore(value=int(opts.threads))
-    if opts.type == '0':
-        sys.stdout.write('dictionary\n')
-        for hostname in hostnames:
-            hostname = hostname.rstrip() + '.' + opts.domain
-            time.sleep(float(opts.wait))
-            threads = run_threads(opts, hostname, attack_pool, threads)
-        for t in threads:
-            t.join()
-    elif opts.type == '1':
-        sys.stdout.write('bruteforce\n')
-        hostnames = str_gen(opts, hostnames)
-        for hostname in hostnames:
-            hostname = opts.prefix + hostname + opts.postfix + '.' + opts.domain
-            time.sleep(float(opts.wait))
-            threads = run_threads(opts, hostname, attack_pool, threads)
-        for t in threads:
-            t.join()
-    else:
-        print('[-] ERROR: unknown attack type')
-        sys.exit()
-    return
+  _hostnames = []
+  sys.stdout.write('[+] attacking \'%s\' via ' % opts.domain)
+  if opts.type == '0':
+    sys.stdout.write('dictionary\n')
+    for hostname in hostnames:
+      _hostnames.append(hostname.rstrip() + '.' + opts.domain)
+  elif opts.type == '1':
+    sys.stdout.write('bruteforce\n')
+    for hostname in itertools.product(opts.charset, repeat=opts.max):
+      _hostnames.append(opts.prefix + ''.join(hostname) + opts.postfix + '.' + \
+        opts.domain)
+  else:
+    print('[-] ERROR: unknown attack type')
+    sys.exit()
+
+  with ThreadPoolExecutor(opts.threads) as exe:
+    for hostname in _hostnames:
+      time.sleep(float(opts.wait))
+      exe.submit(attack, opts, hostname)
+
+  return
 
 
 def ip_extractor(ip):
-    #extract ip from string of rrset answer object
-    try:
-        extracted = re.findall(r'[0-9]+(?:\.[0-9]+){3}', ip)
-        return extracted[0]
-    except:
-        print('[-] ERROR: can\'t extract ip addresses')
-        sys.exit()
+  # extract ip from string of rrset answer object
+  try:
+    extracted = re.findall(r'[0-9]+(?:\.[0-9]+){3}', ip)
+    return extracted[0]
+  except:
+    print('[-] ERROR: can\'t extract ip addresses')
+    sys.exit()
+
+  return
 
 
 def analyze_results(opts, found):
-    #get maindomain ip
-    try:
-        mainhostip = socket.gethostbyname(opts.domain)
-        #append domain|ip to diffound if subdomain ip different than starting
-        # domain ip
-        ([diffound.append(domain + ' | ' + ip)
-        for domain, ip in found if ip_extractor(ip) != mainhostip])
-    except dns.exception.Timeout:
-        sys.exit()
-    except socket.error:
-        print('[-] ERROR: wrong domain or no connection?')
-        sys.exit()
-    return
+  # get maindomain ip
+  try:
+    mainhostip = socket.gethostbyname(opts.domain)
+    # append domain|ip to diffound if subdomain ip different than starting
+    # domain ip
+    ([diffound.append(domain + ' | ' + ip) \
+      for domain, ip in found if ip_extractor(ip) != mainhostip])
+  except dns.exception.Timeout:
+    sys.exit()
+  except socket.error:
+    print('[-] ERROR: wrong domain or no connection?')
+    sys.exit()
+
+  return
 
 
 def log_results(opts, found, diffound):
-    if opts.logfile == 'stdout':
-        print('---')
-        if not found:
-            print('no hosts found :(')
-        else:
-            print('ANSWERED DNS REQUESTS')
-            print('---')
-            for f in found:
-                print(f[0] + ' | ' + f[1])
-        if not diffound:
-            print('---')
-            print('NO HOSTS WITH DIFFERENT IP FOUND :(')
-        else:
-            print('---')
-            print('ANSWERED DNS REQUEST WITH DIFFERENT IP')
-            print('---')
-            for domain in diffound:
-                print(domain)
+  if opts.logfile == 'stdout':
+    print('---')
+    if not found:
+      print('no hosts found :(')
     else:
-        print('[+] logging results to %s' % opts.logfile)
-        with open(opts.logfile, 'w') as f:
-            if found:
-                f.write('---\n')
-                f.write('ANSWERED DNS REQUESTS\n')
-                f.write('---\n')
-                for x in found:
-                    f.write('domain: ' + x[0] + ' | ' + x[1] + '\n')
-            if not diffound:
-                f.write('---\nNO HOSTS WITH DIFFERENT IP FOUND :(\n')
-            else:
-                f.write('---\nANSWERED DNS REQUEST WITH DIFFERENT IP\n---\n')
-                for domain in diffound:
-                    f.write('domain: ' + domain + '\n')
-        f.close()
-    print('[+] game over')
-    return
+      print('ANSWERED DNS REQUESTS')
+      print('---')
+      for f in found:
+        print(f[0] + ' | ' + f[1])
+    if not diffound:
+      print('---')
+      print('NO HOSTS WITH DIFFERENT IP FOUND :(')
+    else:
+      print('---')
+      print('ANSWERED DNS REQUEST WITH DIFFERENT IP')
+      print('---')
+      for domain in diffound:
+        print(domain)
+  else:
+    print('[+] logging results to %s' % opts.logfile)
+    with open(opts.logfile, 'w') as f:
+      if found:
+        for x in found:
+          f.write(x[0] + '\n')
+      if diffound:
+        for domain in diffound:
+          f.write(domain + '\n')
+  print('[+] game over')
+
+  return
 
 
 def main():
-    check_usage()
-    opts = parse_cmdline()
-    check_cmdline(opts)
-    if not opts.dnshost:
-        defaults = get_default_nameserver()
-    if not opts.ipaddr:
-        defaults = get_default_source_ip()
-    if opts.protocol != 'udp' and opts.protocol != 'tcp':
-        print('[-] ERROR: unknown protocol')
-        sys.exit(1337)
-    opts = set_opts(defaults, opts)
-    hostnames = read_hostnames(opts)
-    prepare_attack(opts, hostnames)
-    analyze_results(opts, found)
-    log_results(opts, found, diffound)
-    return
+  check_usage()
+  opts = parse_cmdline()
+  check_cmdline(opts)
+  if not opts.dnshost:
+    defaults = get_default_nameserver()
+  if not opts.ipaddr:
+    defaults = get_default_source_ip()
+  if opts.protocol != 'udp' and opts.protocol != 'tcp':
+    print('[-] ERROR: unknown protocol')
+    sys.exit(1337)
+  opts = set_opts(defaults, opts)
+  hostnames = read_hostnames(opts)
+  prepare_attack(opts, hostnames)
+  #analyze_results(opts, found)
+  log_results(opts, found, diffound)
+
+  return
 
 
 if __name__ == '__main__':
-    try:
-        print(BANNER + '\n')
-        main()
-    except KeyboardInterrupt:
-        print('\n[!] WARNING: aborted by user')
-        raise SystemExit
+  try:
+    print(BANNER + '\n')
+    main()
+  except KeyboardInterrupt:
+    print('\n[!] WARNING: aborted by user')
+    raise SystemExit
+
 
 # EOF
