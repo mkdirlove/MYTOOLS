@@ -6,10 +6,6 @@ DKOM to hide activity on a host. String resolution of symbols no longer works on
 Mountain Lion as symtab is destroyed during load, this code is portable on all
 Lion & below but requires re-working for hooking under Mountain Lion.
 
-MD5
----
-33102898e02eb66cfc1a8f832472bf9e
-
 Author
 ------
 prdelka

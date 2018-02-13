@@ -6,10 +6,6 @@ authentification screens. Unlike other public tools, the aim is to keep it
 simple, stable, fast and modular. With its clean code design, it is easy to
 extend the code to a framework or to fork it against protocols of your choice.
 
-MD5
----
-cc9eecb6fb3729152a1fd79851b634fc
-
 Author
 ------
 noptrix

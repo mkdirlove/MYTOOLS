@@ -2,10 +2,6 @@ Description
 -----------
 Master TFTP fuzzing script as part of the ftools series of fuzzers.
 
-MD5
----
-d3b7780cecd148956c6ef097c75ad678
-
 Author
 ------
 TheXero

@@ -3,12 +3,8 @@ Description
 Arduino sketch which maps the buttons of a Sega Genesis controller
 to the Amiga game port. Supports three and six button gamepads and
 provides autofire. Can be used to build an adapter which enables
-you to buy new Sege Genesis gamepad replicas and connect them to 
+you to buy new Sege Genesis gamepad replicas and connect them to
 your Amiga or C64.
-
-MD5
----
-b37f7c50725850c303ede614b584acb3
 
 Author
 ------

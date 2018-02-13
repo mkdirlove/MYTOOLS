@@ -5,10 +5,6 @@ port scanning module (tcp connect) for discovering possible targets and a
 multithreaded brute-forcing module which attacks parallel all discovered hosts
 or given ip addresses from a list.
 
-MD5
----
-97dcd3bfb5594579bb7552633ccc6d02
-
 Author
 ------
 pgt

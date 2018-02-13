@@ -6,10 +6,6 @@ runs corresponding modules afterwards. sn00p can also parse a given nmap logfile
 for open tcp and udp ports. All results will be logged in specified directories
 and a report can subsequently be generated.
 
-MD5
----
-1c43f2013de4503121385882a2201b27
-
 Author
 ------
 noptrix

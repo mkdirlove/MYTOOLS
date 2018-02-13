@@ -3,10 +3,6 @@ Description
 Loads a wordlist file into memory and reveals the password for the RSA encrypted
 private SSL / SSH key.
 
-MD5
----
-3a732985462206365bb19ef6d49d435a
-
 Author
 ------
 TheXero

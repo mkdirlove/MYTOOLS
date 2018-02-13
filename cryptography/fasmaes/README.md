@@ -6,10 +6,6 @@ segments are necessary which makes it easy to integrate the AES functions in any
 existing project. The implementation is not optimized for speed but for easy
 maintainability.
 
-MD5
----
-759cb6bc3f28cfe7283ccfa82e27c444
-
 Author
 ------
 belial

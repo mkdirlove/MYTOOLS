@@ -14,10 +14,6 @@ Size
 ----
 21 bytes
 
-MD5
----
-15d6609784eabbebe24f537a065a83ef
-
 Author
 ------
 noptrix

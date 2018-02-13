@@ -2,10 +2,6 @@ Description
 -----------
 Atari 2600 Homebrew which can be played with a Lightgun (PAL and NTSC)
 
-MD5
----
-2081f33bd643ba4a26d2db6fb38b457e
-
 Author
 ------
 belial

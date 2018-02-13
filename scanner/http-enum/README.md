@@ -2,10 +2,6 @@ Description
 -----------
 Automated HTTP Enumeration
 
-MD5
----
-3c4f49f9b4913f63d8b8667eb9f448ef
-
 Author
 ------
 TheXero

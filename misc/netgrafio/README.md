@@ -6,10 +6,6 @@ for network analysis but also for representing data in a fancy way. Due to its
 simplicity and cross-platform aspect you can use it almost everywhere. All you
 need is a ... browser :)
 
-MD5
----
-a23e307197d4750908703b5e47540d00
-
 Author
 ------
 Cyneox

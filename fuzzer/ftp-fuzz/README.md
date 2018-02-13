@@ -3,10 +3,6 @@ Description
 The master of all master fuzzing scripts specifically targeted towards FTP
 server sofware.
 
-MD5
----
-6229c149acaf9a83ab37e9c0f0768270
-
 Author
 ------
 TheXero

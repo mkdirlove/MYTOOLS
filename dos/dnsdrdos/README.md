@@ -3,10 +3,6 @@ Description
 Proof of concept code that demonstrates a distributed DNS reflection denial of
 service attack.
 
-MD5
----
-1d6ee3ae4c4eead5651d1855db8261da
-
 Author
 ------
 noptrix

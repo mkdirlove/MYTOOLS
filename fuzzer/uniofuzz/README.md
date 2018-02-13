@@ -3,10 +3,6 @@ Description
 UniOFuzz - the universal fuzzing tool for browsers, web services, files,
 programs and network services/ports.
 
-MD5
----
-699ae0a5715729e8d320012413fac2fe
-
 Author
 ------
 pgt

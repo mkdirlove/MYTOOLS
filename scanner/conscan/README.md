@@ -2,10 +2,6 @@ Description
 -----------
 A blackbox vulnerability scanner for the concrete5 CMS.
 
-MD5
----
-8058a0d7555d31cdcfbd80dbe51f822f
-
 Author
 ------
 TheXero

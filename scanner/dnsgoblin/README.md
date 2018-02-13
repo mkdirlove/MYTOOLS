@@ -3,11 +3,6 @@ Description
 Nasty creature constantly searching for DNS servers. It uses standard dns querys
 and waits for the replies.
 
-MD5
----
-Nasty creature constantly searching for DNS servers. It uses standard dns querys
-and waits for the replies.
-
 Author
 ------
 atzeton

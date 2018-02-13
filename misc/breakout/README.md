@@ -2,10 +2,6 @@ Description
 -----------
 Breakout Atari 2600 Homebrew (PAL only)
 
-MD5
----
-fa223c4b6164d2b727f622a6fde95659
-
 Author
 ------
 belial

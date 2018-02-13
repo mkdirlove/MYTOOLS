@@ -3,10 +3,6 @@ Description
 A very fast multithreaded bruteforcer of subdomains that leverages a wordlist
 and/or character permutation.
 
-MD5
----
-fadca11e2252f7a09df5958b488b0a08
-
 Author
 ------
 noptrix

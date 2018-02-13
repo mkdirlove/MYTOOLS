@@ -2,10 +2,6 @@ Description
 -----------
 A lame script which maps domains related to an given ip address or domainname.
 
-MD5
----
-1c56c62f2bf1cc2095de80cb85f50f55
-
 Author
 ------
 noptrix
