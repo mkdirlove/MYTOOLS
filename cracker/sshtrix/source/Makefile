@@ -67,7 +67,7 @@ default:
 
 
 sshtrix: $(OBJS)
-	$(CC) -o $@ $^ $(CFLAGS) -pthread -lssh -lssh_threads
+	$(CC) -o $@ $^ $(CFLAGS) -pthread -lssh
 
 
 install:
