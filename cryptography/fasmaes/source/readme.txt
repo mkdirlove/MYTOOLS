@@ -57,6 +57,10 @@
 #                                                                             #
 # CHANGELOG:                                                                  #
 #                                                                             #
+# v1.1:                                                                       #
+# - set .reloc sections to readable, otherwise dll can not be loaded in       #
+#   in Windows 10                                                             #
+#                                                                             #
 # v1.0:                                                                       #
 # - initial release                                                           #
 #                                                                             #
