@@ -401,11 +401,9 @@ def log_results(opts, found, diffound):
 def check_wildcard(opts):
   print('[+] running wildcard detection')
   try:
-    ipaddr = socket.gethostbyname(opts.domain)
     fake = socket.gethostbyname(opts.charset + '.' + opts.domain)
-    if ipaddr == fake:
-      print('''[-] ERROR: wildcards detected! all subdomains will point to same ip-addr. makes no sense to continue... aborting''')
-      os._exit(1)
+    print('''[-] ERROR: wildcards detected! all subdomains will point to same ip-addr. makes no sense to continue... aborting''')
+    os._exit(1)
   except:
     pass
 
