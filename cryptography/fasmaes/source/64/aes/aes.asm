@@ -50,9 +50,9 @@ local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE, sbox[SBOX_SIZE]:BYTE,\
             [rcon_ptr]
 
     ;copy clear text to encryption buffer
-    mov ecx, [size]
-    mov esi, [cleartext_ptr]
-    mov edi, [enctext_ptr]
+    mov rcx, [size]
+    mov rsi, [cleartext_ptr]
+    mov rdi, [enctext_ptr]
     rep movsb
 
     ;rsi == current to be encrypted block

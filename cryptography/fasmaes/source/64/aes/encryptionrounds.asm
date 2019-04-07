@@ -1,5 +1,5 @@
 ;uses the generated round keys to encrypt an aes block
-proc encryptionRounds encryption_ptr:DWORD,\
+proc encryptionRounds encryption_ptr:QWORD,\
      roundkeys_ptr:QWORD, sbox_ptr:QWORD, mul2_table_ptr:QWORD, \
      mul3_table_ptr:QWORD
 
