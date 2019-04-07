@@ -1,7 +1,7 @@
-format PE CONSOLE 4.0
+format PE64 GUI 5.0
 entry start
 
-include 'win32a.inc'
+include 'win64a.inc'
 include 'aes/aes.inc'
 
 TEXTSIZE equ 3*BLOCK_SIZE
@@ -9,14 +9,14 @@ TEXTSIZE equ 3*BLOCK_SIZE
 section '.text' code readable executable
 
   start:
-    stdcall encAES, TEXTSIZE, clear_msg, enc_msg, key128
-    stdcall decAES, TEXTSIZE, enc_msg, dec_msg, key128
+    fastcall encAES, TEXTSIZE, clear_msg, enc_msg, key128
+    fastcall decAES, TEXTSIZE, enc_msg, dec_msg, key128
 
-    ;stdcall encAES, TEXTSIZE, clear_msg, enc_msg, key192
-    ;stdcall decAES, TEXTSIZE, enc_msg, dec_msg, key192
+    ;fastcall encAES, TEXTSIZE, clear_msg, enc_msg, key192
+    ;fastcall decAES, TEXTSIZE, enc_msg, dec_msg, key192
 
-    ;stdcall encAES, TEXTSIZE, clear_msg, enc_msg, key256
-    ;stdcall decAES, TEXTSIZE, enc_msg, dec_msg, key256
+    ;fastcall encAES, TEXTSIZE, clear_msg, enc_msg, key256
+    ;fastcall decAES, TEXTSIZE, enc_msg, dec_msg, key256
 
     invoke getchar
     invoke ExitProcess, 0

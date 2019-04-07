@@ -149,8 +149,8 @@ endp
 end if
 
 if defined AES256
-proc createKeyChain keychain_ptr:DWORD, sbox_ptr:DWORD,\
-                    rcon_ptr:DWORD
+proc createKeyChain keychain_ptr:QWORD, sbox_ptr:QWORD,\
+                    rcon_ptr:QWORD
 
      mov [keychain_ptr],rcx
      mov [sbox_ptr],rdx

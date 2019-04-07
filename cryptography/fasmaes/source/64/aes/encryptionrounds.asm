@@ -153,24 +153,22 @@ macro storeRow{
 
 proc shiftRows, data_ptr:DWORD
 
-    push rax
     push rbx
-    mov ebx,[data_ptr]
+    mov rbx,rcx ;[data_ptr]
 
     loadRow
     rol eax, 24
     storeRow
-    inc ebx
+    inc rbx
     loadRow
     rol eax, 16
     storeRow
-    inc ebx
+    inc rbx
     loadRow
     rol eax, 8
     storeRow
 
     pop rbx
-    pop rax
     ret
 
 endp

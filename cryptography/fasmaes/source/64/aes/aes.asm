@@ -20,10 +20,7 @@ local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE, sbox[SBOX_SIZE]:BYTE,\
     mov [enctext_ptr],r8
     mov [aeskey_ptr],r9
 
-    ;push rax
     push rbx
-    ;push rcx
-    ;push rdx
     push rsi
     push rdi
         
