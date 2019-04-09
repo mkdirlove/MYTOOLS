@@ -19,7 +19,7 @@ key_schedule_round:
      ;xor the result with ecx-ROW_SIZE-1
      fastcall loadColumn, [keychain_ptr], r12
      ;shift rows
-     rol rax,8
+     rol eax,8
      ;substitute with sbox
      fastcall subBytes, rax, [sbox_ptr]
      ;xor with rcon
@@ -84,7 +84,7 @@ key_schedule_round:
      ;xor the result with r12-ROW_SIZE-1
      fastcall loadColumn, [keychain_ptr], r12
      ;shift rows
-     rol rax,8
+     rol eax,8
      ;substitute with sbox
      fastcall subBytes, rax, [sbox_ptr]
      ;xor with rcon
@@ -168,7 +168,7 @@ key_schedule_round:
      ;xor the result with ecx-ROW_SIZE-1
      fastcall loadColumn, [keychain_ptr], r12
      ;shift rows
-     rol rax,8
+     rol eax,8
      ;substitute with sbox
      fastcall subBytes, rax, [sbox_ptr]
      ;xor with rcon
@@ -293,13 +293,13 @@ proc subBytes subkey:QWORD, sbox_ptr:QWORD
      mov rax,rcx ;[subkey]
      mov rbx,rdx ;[sbox_ptr]
      xlatb
-     ror rax, 8
+     ror eax, 8
      xlatb
-     ror rax, 8
+     ror eax, 8
      xlatb
-     ror rax, 8
+     ror eax, 8
      xlatb
-     ror rax, 8
+     ror eax, 8
      pop rbx
      ret
 endp
