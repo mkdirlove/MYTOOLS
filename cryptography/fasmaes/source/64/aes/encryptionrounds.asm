@@ -9,6 +9,7 @@ proc encryptionRounds encryption_ptr:QWORD,\
     mov [mul2_table_ptr],r9
     push rbx
     push r12
+    push r13
 
     ;roundkey and encryption in eax and ebx
     mov r12,[roundkeys_ptr]
@@ -19,7 +20,7 @@ proc encryptionRounds encryption_ptr:QWORD,\
 
     ;main round
     add r12,BLOCK_SIZE
-    mov rcx,ENCRYPTION_ROUNDS - 1
+    mov r13,ENCRYPTION_ROUNDS - 1
 er_main:
     fastcall subBlockBytes, rbx, [sbox_ptr]
     fastcall shiftRows, rbx
@@ -27,7 +28,7 @@ er_main:
     fastcall addRoundKey, rbx, r12
 
     add r12,BLOCK_SIZE
-    dec rcx
+    dec r13
     jnz er_main
 
     ;final round
@@ -35,6 +36,7 @@ er_main:
     fastcall shiftRows, rbx
     fastcall addRoundKey, rbx, r12
 
+    pop r13
     pop r12
     pop rbx
     ret

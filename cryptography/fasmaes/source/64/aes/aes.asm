@@ -61,7 +61,7 @@ local keychain[(ENCRYPTION_ROUNDS+1)*BLOCK_SIZE]:BYTE, sbox[SBOX_SIZE]:BYTE,\
     mov rbx,rsi
     add rbx,[size]
 eaes_block_loop:
-    fastcall encryptionRounds, rax, [keychain_ptr], \
+    fastcall encryptionRounds, rsi, [keychain_ptr], \
             [sbox_ptr], [mul2_table_ptr], [mul3_table_ptr]
 
     add rsi,BLOCK_SIZE
