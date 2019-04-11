@@ -10,10 +10,10 @@
 # AES Implementation for Flat Assembler                                       #
 #                                                                             #
 # VERSION                                                                     #
-# 1.0                                                                         #
+# 1.2                                                                         #
 #                                                                             #
 # DATE                                                                        #
-# 13/02/2012                                                                  #
+# 11.04.2019                                                                  #
 #                                                                             #
 # AUTHOR                                                                      #
 # belial - http://www.nullsecurity.net/                                       #
@@ -56,6 +56,9 @@
 #   and ugly way ;)                                                           #
 #                                                                             #
 # CHANGELOG:                                                                  #
+#                                                                             #
+# v1.2:                                                                       #
+# - added a 64 bit port                                                       #
 #                                                                             #
 # v1.1:                                                                       #
 # - set .reloc sections to readable, otherwise dll can not be loaded in       #

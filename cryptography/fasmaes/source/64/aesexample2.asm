@@ -1,4 +1,4 @@
-format PE64 GUI 5.0 DLL
+format PE64 GUI DLL
 entry DllEntryPoint
 
 include 'win64a.inc'
@@ -55,4 +55,8 @@ section '.edata' export data readable
          decAES,'aesDecrypt'
 
 section '.reloc' fixups data readable discardable
+
+  if $=$$
+    dd 0,8              ; if there are no fixups, generate dummy entry
+  end if
 
