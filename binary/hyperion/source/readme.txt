@@ -1,32 +1,32 @@
-###############################################################################
+ï»¿###############################################################################
 #                                                                             #
-#         ~    .__ °.__   0       o                    ^   .__ °__  `´        #
-#  °____) __ __|  | | °|   ______°____ 0 ____  __ _________|__|/  |_ ___.__.  #
-#  /    \|  | °\  |°|  | °/  ___// __ \_/ ___\|  | °\_  __ \ o\   __<   |  |  #
-# | o°|  \  |  /  |_|  |__\___ \\  ___/\ °\___| o|  /|  | \/  ||  |° \___ O|  #
-# |___|  /____/|____/____/____ °>\___  >\___  >____/ |__|° |__||__|  / ____|  #
-# `´´`´\/´`nullsecurity team`´\/`´´`´\/`´``´\/  ``´```´```´´´´`´``0_o\/´´`´´  #
+#         ~    .__ Â°.__   0       o                    ^   .__ Â°__  `Â´        #
+#  Â°____) __ __|  | | Â°|   ______Â°____ 0 ____  __ _________|__|/  |_ ___.__.  #
+#  /    \|  | Â°\  |Â°|  | Â°/  ___// __ \_/ ___\|  | Â°\_  __ \ o\   __<   |  |  #
+# | oÂ°|  \  |  /  |_|  |__\___ \\  ___/\ Â°\___| o|  /|  | \/  ||  |Â° \___ O|  #
+# |___|  /____/|____/____/____ Â°>\___  >\___  >____/ |__|Â° |__||__|  / ____|  #
+# `Â´Â´`Â´\/Â´`nullsecurity team`Â´\/`Â´Â´`Â´\/`Â´``Â´\/  ``Â´```Â´```Â´Â´Â´Â´`Â´``0_o\/Â´Â´`Â´Â´  #
 #                                                                             #
 # Hyperion: A runtime PE-Crypter                                              #
 #                                                                             #
 # VERSION                                                                     #
-# 1.1                                                                         #
+# 2.0                                                                         #
 #                                                                             #
 # DATE                                                                        #
-# 08/05/2014                                                                  #
+# 08/06/2019                                                                  #
 #                                                                             #
 # AUTHOR                                                                      #
-# belial - http://www.nullsecurity.net/                                       #
+# belial - http://www.phobosys.de/hyperion                                    #
 #                                                                             #
 # LICENSE                                                                     #
 # BSD-License                                                                 #
 #                                                                             #
 # DESCRIPTION                                                                 #
-# Hyperion is a runtime encrypter for 32-bit portable executables. It is a    #
+# Hyperion is a runtime encrypter for 32/64 bit portable executables. It is a #
 # reference implementation and bases on the paper "Hyperion: Implementation   #
 # of a PE-Crypter". The paper describes the implementation details which      #
 # aren't in the scope of this readme file.                                    #
-# The crypter is a C/C++ project and can be compiled with the corresponding   #
+# The crypter is a C project and can be compiled with the corresponding       #
 # makefile (tested with Mingw and Visual Studio). Afterwards it is started    #
 # via the command line and encrypts an input executable with AES-128. The     #
 # encrypted file decrypts itself on startup (bruteforcing the AES key which   #
@@ -37,11 +37,18 @@
 # - AV evasion (obfuscate sbox, strings, reduce entropy, etc.)                #
 # - Polymorphic generation of the container                                   #
 # - Add .NET Support                                                          #
-# - Add native 64-Bit Support                                                 #
 # - Preserve Icon and GUI/Console Flag                                        #
 # - Check for correct DLL Version Numbers before Loading                      #
+# - 64 bit asm code cleanup (container and aes payload)                       #
+# - Remove macros in Asm Code                                                 #
 #                                                                             #
 # CHANGELOG:                                                                  #
+#                                                                             #
+# v2.0:                                                                       #
+# - added 64-bit support                                                      #
+# - upgraded fasm.exe to 1.71                                                 #
+# - flexible payload structure to add your own ecryption algos                #
+# - removed c++ code and added pure c instead                                 #
 #                                                                             #
 # v1.2:                                                                       #
 # - added windows 8 and 8.1 support (thx to CoolOppo)                         #

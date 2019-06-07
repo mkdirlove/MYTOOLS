@@ -1,5 +1,5 @@
 # Description
-Hyperion is a runtime encrypter for 32-bit portable executables. It is a
+Hyperion is a runtime encrypter for 32/64 bit portable executables. It is a
 reference implementation and bases on the paper "Hyperion: Implementation of a
 PE-Crypter".
 

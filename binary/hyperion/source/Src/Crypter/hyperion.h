@@ -1,30 +1,68 @@
-#ifndef HYPERION_H_INCLUDED
-#define HYPERION_H_INCLUDED
+#ifndef __HYPERION_H__
+#define __HYPERION_H__
 
-#include "fileaccess.h"
-#include "peanalysis.h"
-#include "createoutput.h"
+#include <windows.h>
+#include <stdint.h>
 #include "pe.h"
-#include "ostreamlog.h"
+#include "fasmoutput.h"
 
-#define INFILE_SIZE_INC "Src\\FasmContainer32\\infile_size.inc"
-#define INFILE_SIZE_LABEL "INFILE_SIZE"
+#define TRUE 1
+#define FALSE 0
+#define MAX_CHAR_SIZE 1024
 
-#define IMAGE_BASE_INC "Src\\FasmContainer32\\image_base.inc"
-#define IMAGE_BASE_LABEL "IMAGE_BASE"
+#define CHECKSUM_SIZE 4
+#define AES_KEY_SIZE 16
+#define AES_BLOCK_SIZE 16
+#define AES_ENCRYPT_API "aesEncrypt"
+#define AES_DLL "Src\\Payloads\\Aes\\bin\\aes10.dll"
 
-#define CONTAINER_MAIN "Src\\FasmContainer32\\main.asm"
+struct OpenFile {
+        unsigned char* file;
+        int size;
+};
 
-#define IMAGE_SIZE_INC "Src\\FasmContainer32\\image_size.inc"
-#define IMAGE_SIZE_LABEL "IMAGE_SIZE"
+struct PEData {
+        uint32_t ImageBase32;
+        uint64_t ImageBase64;
+        uint32_t SizeOfImage;
+};
 
-#define KEY_SIZE_INC "Src\\FasmContainer32\\key_size.inc"
+//verbose api
+void verbose(const char *format, ...);
 
-#define INFILE_CODE "Src\\FasmContainer32\\infile_code.asm"
-#define INFILE_ARRAY "Src\\FasmContainer32\\infile_array.inc"
+//file api
+BOOL fileToMem(const char* file_name, struct OpenFile* open_file);
+BOOL memToFile(const char* file_name, char* content, unsigned long size,
+               BOOL append);
 
-#define LOGFILE_SELECT_INC "Src\\FasmContainer32\\logfile_select.asm"
+//pe api
+struct CoffHeader* getCoffHeader(struct OpenFile* input_file);
+BOOL isExecutable(struct CoffHeader* coff_header);
+BOOL isPE32(struct CoffHeader* coff_header);
+struct OptionalStandardHeader32* getOSH32(struct CoffHeader* coff_ptr);
+struct OptionalStandardHeader64* getOSH64(struct CoffHeader* coff_ptr);
+struct OptionalWindowsHeader32* getOWH32(struct OptionalStandardHeader32* os_ptr);
+struct OptionalWindowsHeader64* getOWH64(struct OptionalStandardHeader64* os_ptr);
 
-#define FASM_EXECUTABLE "Fasm\\FASM.EXE"
+//fasm api
+BOOL fasmDefine(const char* output_dir, const char* filename,
+                const char* label, uint64_t value, BOOL append);
+BOOL fasmInclude(const char* output_dir, const char* filename,
+                const char* label, BOOL append);
+BOOL fasmEncryptOutput(const char* output_dir, struct OpenFile* input_file,
+                       unsigned int key_length, unsigned int key_space);
 
-#endif // HYPERION_H_INCLUDED
+//encryption api
+uint32_t getChecksum(unsigned char* data, unsigned int size);
+BOOL encryptFile(uint8_t* input_file, unsigned int file_size,
+                 unsigned int key_length, unsigned int key_space);
+BOOL encryptAES(uint8_t* input, unsigned int size, uint8_t* key);
+
+//decryption api
+BOOL decryptAES(BOOL pe32);
+
+//secure string
+size_t strlcat(char *dst, const char *src, size_t size);
+size_t strlcpy(char *dst, const char *src, size_t size);
+
+#endif
