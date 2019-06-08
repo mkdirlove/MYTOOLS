@@ -11,7 +11,7 @@ extern BOOL display_verbose;
 int main(int argc, char *argv[]){
         if(argc<3) {
                 printf("Hyperion PE-Crypter\n");
-                printf("Version 1.3 by Christian Ammann\n");
+                printf("Version 2.0 by Christian Ammann\n");
                 printf("Http://www.phobosys.de/hyperion\n");
                 printf("\n");
                 printf("Usage: hyperion.exe <options> <infile> <outfile>\n");
